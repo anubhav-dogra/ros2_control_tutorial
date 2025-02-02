@@ -127,14 +127,14 @@ def generate_launch_description():
     # Gazebo nodes
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            [FindPackageShare("ros_ign_gazebo"), "/launch", "/ign_gazebo.launch.py"]
+            [FindPackageShare("ros_gz_sim"), "/launch", "/gz_sim.launch.py"]
         ),
-        launch_arguments={"ign_args": " -r -v 3 empty.sdf"}.items(),
+        launch_arguments={"gz_args": " -r -v 3 empty.sdf"}.items(),
     )
 
     # Spawn robot
     gazebo_spawn_robot = Node(
-        package="ros_ign_gazebo",
+        package="ros_gz_sim",
         executable="create",
         name="spawn_rrbot",
         arguments=["-name", "rrbot", "-topic", "robot_description"],

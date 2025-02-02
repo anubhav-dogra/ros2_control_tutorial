@@ -118,39 +118,7 @@
       <child link="${prefix}flange" />
     </joint>
 <!-- END Delete if not needed  -->
-     <!-- Add Gazebo Classic Plugins -->
-    <gazebo>
-      <plugin name="joint_state_publisher" filename="libgazebo_ros_joint_state_publisher.so">
-        <update_rate>100</update_rate>
-      </plugin>
-    </gazebo>
 
-    <gazebo reference="${prefix}joint1">
-      <plugin name="gazebo_ros_control" filename="libgazebo_ros2_control.so">
-        <robotNamespace>/</robotNamespace>
-      </plugin>
-    </gazebo>
-
-    <gazebo reference="${prefix}joint2">
-      <plugin name="gazebo_ros_control" filename="libgazebo_ros2_control.so">
-        <robotNamespace>/</robotNamespace>
-      </plugin>
-    </gazebo>
-
-    <!-- Gazebo Classic physics -->
-    <gazebo>
-      <static>false</static>
-      <gravity>0 0 -9.81</gravity>
-    </gazebo>
-
-    <!-- Add Gazebo Sim (Ignition) Support -->
-    <gazebo>
-      <plugin name="ignition_ros2_control" filename="libignition_ros2_control-system.so">
-        <ros>
-          <namespace>/</namespace>
-        </ros>
-      </plugin>
-    </gazebo>
 
   </xacro:macro>
 </robot>

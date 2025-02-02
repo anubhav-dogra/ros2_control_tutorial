@@ -51,21 +51,6 @@ def generate_launch_description():
     )
     declared_arguments.append(
         DeclareLaunchArgument(
-            "use_mock_hardware",
-            default_value="true",
-            description="Start robot with fake hardware mirroring command to its states.",
-        )
-    )
-    declared_arguments.append(
-        DeclareLaunchArgument(
-            "mock_sensor_commands",
-            default_value="true",
-            description="Enable fake command interfaces for sensors used for simple simulations. \
-            Used only if 'use_mock_hardware' parameter is true.",
-        )
-    )
-    declared_arguments.append(
-        DeclareLaunchArgument(
             "robot_controller",
             default_value="joint_trajectory_controller",
             choices=["forward_position_controller", "joint_trajectory_controller"],
@@ -113,7 +98,7 @@ def generate_launch_description():
             " ",
             "sim_gazebo_classic:=true",
             " ",
-            "sim_gazebo:=true",
+            "sim_gazebo:=false",
             " ",
             "simulation_controllers:=",
             robot_controllers,
@@ -145,16 +130,19 @@ def generate_launch_description():
 
      # Gazebo nodes
     gazebo = IncludeLaunchDescription(
-        LaunchDescriptionSource(
-            [FindPackageShare("gazebo_ros"), "/launch", "/gazebo.launch.py"]
-        ),
+        PathJoinSubstitution(
+            [FindPackageShare("ros_gz_sim"), "launch", "gz_sim.launch.py"]
+        )
     )
     # Spawn robot
     gazebo_spawn_robot = Node(
-        package="gazebo_ros",
-        executable="spawn_entity.py",
+        package="ros_gz_sim",
+        executable="create",
         name="spawn_rrbot",
-        arguments=["-entity", "rrbot", "-topic", "robot_description"],
+        arguments=[
+            "-name", "rrbot",
+            "-topic", "robot_description",
+            "-x", "0", "-y", "0", "-z", "0.5"],
         output="screen",
     )
     # delay_rviz_after_joint_state_publisher_node = RegisterEventHandler(
@@ -179,11 +167,9 @@ def generate_launch_description():
         ],
     )
 
-    robot_controllers = [robot_controller]
-    # robot_controllers = ["forward_position_controller", "joint_trajectory_controller"]
-    robot_controller_spawners = []
-    for controller in robot_controllers:
-        robot_controller_spawners += [
+    # robot_controllers = [robot_controller]
+    robot_controllers = ["forward_position_controller", "joint_trajectory_controller"]
+    robot_controller_spawners = [
             Node(
                 package="controller_manager",
                 executable="spawner",
@@ -191,10 +177,19 @@ def generate_launch_description():
                     controller,
                     "-c", 
                     "/controller_manager"],
-                )
+                ) for controller in ["forward_position_controller", "joint_trajectory_controller"]
         ]
 
-    controllers_to_spawn = robot_controller_spawners
+    # controllers_to_spawn = robot_controller_spawners
+
+    # print("=== DEBUG: gazebo ===", type(gazebo))
+    # print("=== DEBUG: gazebo_spawn_robot ===", type(gazebo_spawn_robot))
+    # print("=== DEBUG: robot_state_publisher_node ===", type(robot_state_publisher_node))
+    # print("=== DEBUG: rviz_node ===", type(rviz_node))
+    # print("=== DEBUG: joint_state_broadcaster_spawner ===", type(joint_state_broadcaster_spawner))
+    # print("=== DEBUG: robot_controller_spawners ===", type(robot_controller_spawners))
+    # for node in robot_controller_spawners:
+    #     print("   -> ", type(node))  # Print each controller spawner
 
     return LaunchDescription(
         declared_arguments
@@ -203,7 +198,8 @@ def generate_launch_description():
             gazebo_spawn_robot,
             robot_state_publisher_node,
             rviz_node,
-            joint_state_broadcaster_spawner]
+            joint_state_broadcaster_spawner,
+            ]
         + 
-            controllers_to_spawn            
+            robot_controller_spawners            
     )
